@@ -247,6 +247,15 @@ namespace Synapse.Migrations
                     b.Property<string>("PublicKey")
                         .HasColumnType("longtext");
 
+                    b.Property<string>("PublicKeyFingerprint")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("PublicKeyUpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("PublicKeyVersion")
+                        .HasColumnType("int");
+
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasColumnType("varchar(255)");

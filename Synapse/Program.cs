@@ -105,3 +105,8 @@ app.MapControllers();
 app.MapHub<ChatHub>("/hubs/chat");
 
 app.Run();
+
+public partial class Program
+{
+
+}

@@ -143,6 +143,7 @@ public class ServersController : ControllerBase
         {
             ServerId = server.Id,
             UserId = userId,
+            Role = "Owner",
             JoinedAt = DateTime.UtcNow
         };
 

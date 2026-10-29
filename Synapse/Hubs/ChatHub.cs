@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using Synapse.Backend.Data;
+using Synapse.Infrastructure.Data;
 using System.Security.Claims;
 
 namespace Synapse.Backend.Hubs;

@@ -2,9 +2,15 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
-using Synapse.Backend.Data;
+using Synapse.Infrastructure.Data;
 using Synapse.Backend.Hubs;
 using System.Text;
+using Synapse.Domain.Interfaces;
+using Synapse.Infrastructure.Repositories;
+using Synapse.Application.Interfaces;
+using Synapse.Application.Services;
+using Synapse.Infrastructure.Services;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -87,6 +93,24 @@ builder.Services
 
 builder.Services.AddAuthorization();
 
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IServerRepository, ServerRepository>();
+builder.Services.AddScoped<IServerMemberRepository, ServerMemberRepository>();
+builder.Services.AddScoped<IServerInviteRepository, ServerInviteRepository>();
+builder.Services.AddScoped<IChannelRepository, ChannelRepository>();
+builder.Services.AddScoped<IMessageRepository, MessageRepository>();
+builder.Services.AddScoped<IPrivateChatRepository, PrivateChatRepository>();
+builder.Services.AddScoped<IPrivateChatMemberRepository, PrivateChatMemberRepository>();
+
+builder.Services.AddScoped<IServerService, ServerService>();
+builder.Services.AddScoped<IChannelService, ChannelService>();
+builder.Services.AddScoped<IServerMemberService, ServerMemberService>();
+builder.Services.AddScoped<IServerInviteService,ServerInviteService>();
+builder.Services.AddScoped<IMessageService,MessageService>();
+builder.Services.AddScoped<IPrivateChatService,PrivateChatService>();
+builder.Services.AddScoped<IPrivateChatMemberService,PrivateChatMemberService>();
+builder.Services.AddScoped<IUserService,UserService>();
+builder.Services.AddScoped<IAuthService,AuthService>();
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

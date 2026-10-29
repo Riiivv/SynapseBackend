@@ -23,4 +23,9 @@
     <PackageReference Include="Scalar.AspNetCore" Version="2.17.12" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Synapse.Application\Synapse.Application.csproj" />
+    <ProjectReference Include="..\Synapse.Infrastructure\Synapse.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>

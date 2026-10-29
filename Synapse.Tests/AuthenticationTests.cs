@@ -1,6 +1,6 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
-using Synapse.Backend.DTOs;
+using Synapse.Application.DTOs;
 using Xunit;
 
 namespace Synapse.Tests;

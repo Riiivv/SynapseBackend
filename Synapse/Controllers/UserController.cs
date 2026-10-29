@@ -1,11 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Synapse.Backend.Data;
-using Synapse.Backend.DTOs;
+using Synapse.Application.Common;
+using Synapse.Application.DTOs;
+using Synapse.Application.Interfaces;
 using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace Synapse.Backend.Controllers;
 
@@ -14,24 +12,17 @@ namespace Synapse.Backend.Controllers;
 [Route("api/[controller]")]
 public class UsersController : ControllerBase
 {
-    private readonly SynapseDbContext _context;
+    private readonly IUserService _userService;
 
-    public UsersController(SynapseDbContext context)
+    public UsersController(IUserService userService)
     {
-        _context = context;
+        _userService = userService;
     }
 
     [HttpGet]
     public async Task<ActionResult<List<UserResponse>>> GetUsers()
     {
-        var users = await _context.Users
-            .Select(u => new UserResponse
-            {
-                Id = u.Id,
-                Username = u.Username,
-                Email = u.Email
-            })
-            .ToListAsync();
+        var users = await _userService.GetAllAsync();
 
         return Ok(users);
     }
@@ -39,101 +30,93 @@ public class UsersController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<UserResponse>> GetUser(int id)
     {
-        var user = await _context.Users
-            .Where(u => u.Id == id)
-            .Select(u => new UserResponse
-            {
-                Id = u.Id,
-                Username = u.Username,
-                Email = u.Email
-            })
-            .FirstOrDefaultAsync();
+        var result = await _userService.GetByIdAsync(id);
 
-        if (user == null)
-        {
-            return NotFound("Bruger findes ikke.");
-        }
-
-        return Ok(user);
+        return HandleResult(result);
     }
 
     [HttpPut("public-key")]
     public async Task<IActionResult> UpdatePublicKey(
         UpdatePublicKeyRequest request)
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        var userId = GetCurrentUserId();
 
-        if (userIdClaim == null)
+        if (userId == null)
         {
             return Unauthorized();
         }
 
-        var userId = int.Parse(userIdClaim.Value);
+        var result =
+            await _userService.UpdatePublicKeyAsync(
+                userId.Value,
+                request);
 
-        var user = await _context.Users
-            .FirstOrDefaultAsync(u => u.Id == userId);
-
-        if (user == null)
+        return result.Status switch
         {
-            return NotFound("Bruger findes ikke.");
-        }
+            ServiceStatus.Success =>
+                NoContent(),
 
-        var publicKey = request.PublicKey.Trim();
+            ServiceStatus.NotFound =>
+                NotFound(result.Error),
 
-        if (string.IsNullOrWhiteSpace(publicKey))
-        {
-            return BadRequest("Public key må ikke være tom.");
-        }
+            ServiceStatus.Forbidden =>
+                Forbid(),
 
-        var keyBytes = Encoding.UTF8.GetBytes(publicKey);
+            ServiceStatus.BadRequest =>
+                BadRequest(result.Error),
 
-        var hash = SHA256.HashData(keyBytes);
-
-        var fingerprint = Convert.ToHexString(hash);
-
-        // Hvis samme key allerede er registreret,
-        // behøver vi ikke lave en ny version.
-        if (user.PublicKeyFingerprint == fingerprint)
-        {
-            return NoContent();
-        }
-
-        user.PublicKey = publicKey;
-        user.PublicKeyFingerprint = fingerprint;
-        user.PublicKeyVersion += 1;
-        user.PublicKeyUpdatedAt = DateTime.UtcNow;
-
-        await _context.SaveChangesAsync();
-
-        return NoContent();
+            _ => BadRequest()
+        };
     }
 
     [HttpGet("{id}/public-key")]
-    public async Task<IActionResult> GetPublicKey(int id)
+    public async Task<ActionResult<UserPublicKeyResponse>>
+        GetPublicKey(int id)
     {
-        var user = await _context.Users
-            .FirstOrDefaultAsync(u => u.Id == id);
+        var result =
+            await _userService.GetPublicKeyAsync(id);
 
-        if (user == null)
+        return HandleResult(result);
+    }
+
+    private ActionResult<T> HandleResult<T>(
+        ServiceResult<T> result)
+    {
+        return result.Status switch
         {
-            return NotFound("Bruger findes ikke.");
+            ServiceStatus.Success =>
+                Ok(result.Data),
+
+            ServiceStatus.NotFound =>
+                NotFound(result.Error),
+
+            ServiceStatus.Forbidden =>
+                Forbid(),
+
+            ServiceStatus.BadRequest =>
+                BadRequest(result.Error),
+
+            _ => BadRequest()
+        };
+    }
+
+    private int? GetCurrentUserId()
+    {
+        var claim =
+            User.FindFirst(ClaimTypes.NameIdentifier);
+
+        if (claim == null)
+        {
+            return null;
         }
 
-        if (string.IsNullOrWhiteSpace(user.PublicKey))
+        if (!int.TryParse(
+                claim.Value,
+                out var userId))
         {
-            return NotFound(
-                "Brugeren har ikke registreret en public key."
-            );
+            return null;
         }
 
-        return Ok(new
-        {
-            user.Id,
-            user.Username,
-            user.PublicKey,
-            user.PublicKeyFingerprint,
-            user.PublicKeyVersion,
-            user.PublicKeyUpdatedAt
-        });
+        return userId;
     }
 }

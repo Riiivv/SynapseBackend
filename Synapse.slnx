@@ -1,4 +1,7 @@
 <Solution>
+  <Project Path="Synapse.Application/Synapse.Application.csproj" />
+  <Project Path="Synapse.Domain/Synapse.Domain.csproj" />
+  <Project Path="Synapse.Infrastructure/Synapse.Infrastructure.csproj" />
   <Project Path="Synapse.Tests/Synapse.Tests.csproj" />
   <Project Path="Synapse/Synapse.csproj" />
 </Solution>

@@ -6,13 +6,9 @@ public interface IPrivateChatMemberRepository
 {
     Task<List<PrivateChatMember>> GetByChatIdAsync(int privateChatId);
 
-    Task<PrivateChatMember?> GetMembershipAsync(
-        int privateChatId,
-        int userId);
+    Task<PrivateChatMember?> GetMembershipAsync(int privateChatId,int userId);
 
-    Task<bool> IsMemberAsync(
-        int privateChatId,
-        int userId);
+    Task<bool> IsMemberAsync(int privateChatId,int userId);
 
     Task AddAsync(PrivateChatMember member);
 

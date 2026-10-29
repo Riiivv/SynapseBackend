@@ -8,9 +8,7 @@ public interface IPrivateChatRepository
 
     Task<List<PrivateChat>> GetForUserAsync(int userId);
 
-    Task<PrivateChat?> GetBetweenUsersAsync(
-        int firstUserId,
-        int secondUserId);
+    Task<PrivateChat?> GetBetweenUsersAsync(int firstUserId,int secondUserId);
 
     Task AddAsync(PrivateChat privateChat);
 

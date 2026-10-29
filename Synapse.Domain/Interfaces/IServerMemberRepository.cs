@@ -6,13 +6,9 @@ public interface IServerMemberRepository
 {
     Task<List<ServerMember>> GetByServerIdAsync(int serverId);
 
-    Task<ServerMember?> GetMembershipAsync(
-        int serverId,
-        int userId);
+    Task<ServerMember?> GetMembershipAsync(int serverId,int userId);
 
-    Task<bool> IsMemberAsync(
-        int serverId,
-        int userId);
+    Task<bool> IsMemberAsync(int serverId,int userId);
 
     Task AddAsync(ServerMember member);
 
